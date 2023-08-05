@@ -7,8 +7,8 @@ Mentor: Professor James Harland
 Client: Dr Ian Peake
 
 Team Members:
-Jasper Avice Demay
-Selamawit Tewelde Birhane
-Allister Jon Toos
-Jiarui YaoJiarui Yao
-Adem Saydam
+Jasper Avice Demay,
+Selamawit Tewelde Birhane,
+Allister Jon Toos,
+Jiarui YaoJiarui Yao,
+Adem Saydam,
