@@ -5,11 +5,15 @@ Mentor: Professor James Harland
 Client: Dr Ian Peake
 
 Team Members:
-Jasper Avice Demay,
-Selamawit Tewelde Birhane,
-Allister Jon Toos,
-Jiarui YaoJiarui Yao,
-Adem Saydam,
+- Jasper Avice Demay
+- Selamawit Tewelde Birhane
+- Allister Jon Toos
+- Jiarui YaoJiarui Yao
+- Adem Saydam
+
+### Front-End
+Front-End adapted from the [Chats-With-Rosie project](https://github.com/Chats-With-Rosie/rosie-front-end)
+
 
 ### Playing with the Rosie Character Definition through Oogabooga Text Generation WebUI
 Follow the instructions to install and run the Text Generation WebUI found [here](https://github.com/oobabooga/text-generation-webui). Follow the instructions in the linked repository to find and set up a suitable language model from the HuggingFace repository.
