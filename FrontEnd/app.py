@@ -103,7 +103,7 @@ def SpeechToText():
 
     # Retrieve OpenAI API key from environment variables
     #openAI_API_key = os.environ.get('OPENAI_API_KEY') or "<insert your API key here>"
-    openAI_API_key = os.environ.get('OPENAI_API_KEY')
+    openAI_API_key = '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'
 
     # Check if the audio_url field is present in the request JSON payload
     if 'file' not in request.files:
@@ -120,6 +120,7 @@ def SpeechToText():
     # Transcribe the audio file using OpenAI and send the query to the Think endpoint
     print("Transcribing")
     transcription = transcribe(audio_output_file_path, openAI_API_key)
+    global recognisedText
     recognisedText = transcription
     print(transcription)
     response = textGen(transcription)
@@ -148,5 +149,5 @@ def text_to_speech():
     return jsonify({"response": "Audio file saved successfully"}), 200
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run(port=5000)
 
