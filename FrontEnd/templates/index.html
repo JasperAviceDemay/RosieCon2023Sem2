@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+    <script>
+        let audioRecorder;
+        let audioContext;
+
+        function sendAudioToServer(blob) {
+          let formData = new FormData();
+          formData.append("file", blob);
+      
+          $.ajax({
+              url: "/upload-audio-to-self",
+              type: "POST",
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function(response) {
+                  console.log("Audio sent to server.");
+				  fetchRecognisedText();
+              },
+              error: function(xhr, status, error) {
+                  console.error("Error sending audio to server.");
+              }
+          });
+      }
+      
+
+        function initAudioRecorder() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+                audioContext = new AudioContext();
+                let input = audioContext.createMediaStreamSource(stream);
+                audioRecorder = new Recorder(input);
+            });
+        }
+        let isPlaying = false;
+        let previousAudioTimestamp = null;
+        
+        function playAudio(audioUrl) {
+            if (isPlaying) {
+                return;
+            }
+            
+            // Add a cache-busting query string to the audio URL
+            audioUrl += (audioUrl.indexOf('?') === -1 ? '?' : '&') + 'cb=' + new Date().getTime();
+            
+            let audio = new Audio(audioUrl);
+            isPlaying = true;
+            
+            console.log("Playing audio:", audioUrl);
+            
+            audio.addEventListener('ended', function() {
+                console.log("Audio finished playing");
+                isPlaying = false;
+                previousAudioTimestamp = new Date().getTime();
+            });
+            
+            audio.addEventListener('error', function(e) {
+                console.error('Audio error:', e);
+            });
+            
+            audio.play();
+        }
+        
+        async function checkForResponse() {
+            while (true) {
+                const response = await fetch("/get-last-response");
+                const data = await response.json();
+                document.getElementById("responseField").innerHTML = data.response;
+
+            
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        $(document).ready(function() {
+            initAudioRecorder();
+            //checkForResponse();
+
+            $("#record-audio").on("click", function() {
+                if (!audioRecorder) {
+                    alert("Audio recording is not initialized.");
+                    return;
+                }
+
+                if ($(this).hasClass("recording")) {
+                audioRecorder.stop();
+                audioRecorder.exportWAV(sendAudioToServer);
+                $(this).removeClass("recording");
+                $(this).text("Start Recording");
+                } else {
+                audioRecorder.clear();
+                audioRecorder.record();
+                $(this).addClass("recording");
+                $(this).text("Stop Recording");
+                }
+            });
+
+            $("#upload-text-file").on("click", function() {
+                  let textFile = $("#text-file")[0].files[0];
+      
+                  if (textFile) {
+                      uploadTextFile(textFile);
+                  } else {
+                      alert("Please select a text file.");
+                  }
+            });
+
+            $("#play-audio").on("click", function() {
+                const audioPath = "static/uploads/speak.wav";
+                playAudio(audioPath);
+            });
+        });
+        function showRecognizedText(text) {
+            document.getElementById('recognizedText').value = text;
+        }
+		function fetchRecognisedText() {
+          $.get("/get-recognised-text", function(data) {
+              $("#recognizedText").val(data.recognised);
+          });
+		}
+        // This function will be called when the user clicks the confirm button
+        function confirmChanges() {
+            let text = document.getElementById('recognizedText').value;
+            // Add the code to send the text to Rosie here
+            console.log('Confirmed text:', text);
+        }
+      </script>
+    </head>
+    <body>
+        <div>
+            <h2>Audio Recorder</h2>
+            <div>
+                <h2>Edit Recognized Text</h2>
+                <textarea id="recognizedText" rows="4" cols="50"></textarea>`
+                <button id="confirmButton" onclick="confirmChanges()">confirm</button>
+            </div>
+            <button id="record-audio">Start Recording</button>
+        </div>
+        <div>
+            <h2>Response</h2>
+            <p id="responseField"></p>
+        </div>
+
+        <div>
+          <h2>Play Audio</h2>
+          <button id="play-audio">Play Audio</button>
+        </div>
+        <!-- <div>
+            <h2>Upload Text File</h2>
+            <input type="file" id="text-file" accept=".txt" />
+            <button id="upload-text-file">Upload Text File</button>
+        </div> -->
+    </body>
+    </html>
