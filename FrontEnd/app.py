@@ -103,7 +103,7 @@ def SpeechToText():
 
     # Retrieve OpenAI API key from environment variables
     #openAI_API_key = os.environ.get('OPENAI_API_KEY') or "<insert your API key here>"
-    openAI_API_key = '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'
+    openAI_API_key = 'OPENAI_API_KEY'
 
     # Check if the audio_url field is present in the request JSON payload
     if 'file' not in request.files:
