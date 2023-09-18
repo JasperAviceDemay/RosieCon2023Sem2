@@ -5,16 +5,11 @@ import json
 import html
 from gtts import gTTS
 from flask import Flask, request, jsonify, render_template, send_file
-from pydub import AudioSegment
-from pydub.playback import play
-from playsound import playsound
-import time
-import subprocess
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 
 app = Flask(__name__)
 textGenHost = "localhost:5000"
+lastResponse = None
+recognisedText = None
 
 @app.route('/')
 def index():
@@ -28,18 +23,6 @@ def transcribe(audio_output_file_path, openAI_API_key):
 
     transcribed_text = transcript['text']
     return transcribed_text
-
-def send_string_to_endpoint(endpoint, text):
-    try:
-        response = requests.post(endpoint, json={'data': text})
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print(f'Failed to send string to endpoint: {e}')
-        return False
-    except ValueError as e:
-        print(f'Response body is not valid JSON: {e}')
-        return False
-    return True
 
 def textGen(input):
     textgenURL = f"http://{textGenHost}/api/v1/chat"
@@ -97,25 +80,30 @@ def textGen(input):
     if response.status_code == 200:
         result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
         print(result)
+        lastResponse = result
         return result
+    
+def textToSpeech(text):
+    language = request.args.get('lang', 'en')
+    tts = gTTS(text=text, lang=language)
+    tts.save("static/uploads/speak.wav")
 
+@app.route("/get-last-response")
+def getLastResponse():
+    return {'response': lastResponse}
 
-@app.route('/get-audio-timestamp')
-def get_audio_timestamp():
-    audio_file_path = 'static/uploads/speak.wav'
-    if os.path.exists(audio_file_path):
-        last_modified = os.path.getmtime(audio_file_path)
-        return {'timestamp': last_modified}
-    return {'timestamp': None}, 404
+@app.route("/get-recognised-text")
+def getRecognisedText():
+    return {'recognised': recognisedText}
 
 @app.route('/upload-audio-to-self', methods=['POST'])
-def speech_to_text():
+def SpeechToText():
     # Define the path to where the audio file should be saved
     audio_output_file_path = 'static/uploads/audio_file.wav'
 
-    # Retrieve OpenAI API key and Think endpoint from environment variables
-    openAI_API_key = os.environ.get('OPENAI_API_KEY') or "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"
-    # think_endpoint = os.environ.get('THINK_SERVICE') or "http://think_service:5080/think"
+    # Retrieve OpenAI API key from environment variables
+    #openAI_API_key = os.environ.get('OPENAI_API_KEY') or "<insert your API key here>"
+    openAI_API_key = os.environ.get('OPENAI_API_KEY')
 
     # Check if the audio_url field is present in the request JSON payload
     if 'file' not in request.files:
@@ -132,20 +120,16 @@ def speech_to_text():
     # Transcribe the audio file using OpenAI and send the query to the Think endpoint
     print("Transcribing")
     transcription = transcribe(audio_output_file_path, openAI_API_key)
+    recognisedText = transcription
     print(transcription)
     response = textGen(transcription)
     if response is not None:
         tts(response)
-    # send_string_to_endpoint(think_endpoint, query_for_think)
+    
     
     # Return a success message
-    return 'Audio file saved successfully', 200
-    
-def tts(input):
-    language = request.args.get('lang', 'en')
+    return 'Transcription Successful', 200
 
-    tts = gTTS(text=input, lang=language)
-    tts.save("static/uploads/speak.wav")
 
 @app.route('/rosie-speak', methods=['POST'])
 def text_to_speech():
