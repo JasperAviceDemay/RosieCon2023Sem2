@@ -1,13 +1,14 @@
 import os
 import requests
-import openai
-import json
 import html
+import azure.cognitiveservices.speech as speechsdk
 from gtts import gTTS
 from flask import Flask, request, jsonify, render_template, send_file
 
 app = Flask(__name__)
 textGenHost = "localhost:5000"
+AzureSpeechKey, AzureSpeechRegion = os.environ.get('AZURESPEECHKEY'), os.environ.get('AZUREREGION')
+speech_config = speechsdk.SpeechConfig(subscription=AzureSpeechKey, region=AzureSpeechRegion)
 lastResponse = None
 recognisedText = None
 
@@ -15,14 +16,23 @@ recognisedText = None
 def index():
     return render_template('index.html')
 
-def transcribe(audio_output_file_path, openAI_API_key):
-    openai.api_key = openAI_API_key
+def transcribeFile(audio_output_file_path):
+    audio_config = speechsdk.AudioConfig(filename=audio_output_file_path)
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
-    with open(audio_output_file_path, "rb") as audio_file:
-        transcript = openai.Audio.transcribe("whisper-1", audio_file)
+    result = speech_recognizer.recognize_once()
 
-    transcribed_text = transcript['text']
-    return transcribed_text
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Recognized: {}".format(result.text))
+        return result.text
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+            print("Did you set the speech resource key and region values?")
 
 def textGen(input):
     textgenURL = f"http://{textGenHost}/api/v1/chat"
@@ -118,14 +128,15 @@ def SpeechToText():
     
     
     # Transcribe the audio file using OpenAI and send the query to the Think endpoint
-    print("Transcribing")
-    transcription = transcribe(audio_output_file_path, openAI_API_key)
-    global recognisedText
-    recognisedText = transcription
-    print(transcription)
-    response = textGen(transcription)
-    if response is not None:
-        tts(response)
+    print("Transcribing File")
+    transcription = transcribeFile(audio_output_file_path)
+    if transcription is not None:
+        global recognisedText
+        recognisedText = transcription
+        print(transcription)
+        response = textGen(transcription)
+        if response is not None:
+            textToSpeech(response)
     
     
     # Return a success message
@@ -149,5 +160,5 @@ def text_to_speech():
     return jsonify({"response": "Audio file saved successfully"}), 200
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=5001)
 
