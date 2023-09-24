@@ -82,13 +82,22 @@
         $(document).ready(function() {
             initAudioRecorder();
             //checkForResponse();
-
+		//autorecording, set 10sec
+		let isRecording = false;
+		let recordButton = $('#record-audio');
+			
+		setInterval(function() {
+			recordButton.trigger('click');
+			isRecording = !isRecording;
+			recordButton.text(isRecording ? 'Stop Recording' : 'Start Recording');
+		}, 10000);
+		
             $("#record-audio").on("click", function() {
                 if (!audioRecorder) {
                     alert("Audio recording is not initialized.");
                     return;
                 }
-
+		
                 if ($(this).hasClass("recording")) {
                 audioRecorder.stop();
                 audioRecorder.exportWAV(sendAudioToServer);
