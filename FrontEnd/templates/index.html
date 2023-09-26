@@ -83,14 +83,14 @@
             initAudioRecorder();
             //checkForResponse();
 		//autorecording, set 10sec
-		let isRecording = false;
-		let recordButton = $('#record-audio');
+		// let isRecording = false;
+		// let recordButton = $('#record-audio');
 			
-		setInterval(function() {
-			recordButton.trigger('click');
-			isRecording = !isRecording;
-			recordButton.text(isRecording ? 'Stop Recording' : 'Start Recording');
-		}, 10000);
+		// setInterval(function() {
+		// 	recordButton.trigger('click');
+		// 	isRecording = !isRecording;
+		// 	recordButton.text(isRecording ? 'Stop Recording' : 'Start Recording');
+		// }, 10000);
 		
             $("#record-audio").on("click", function() {
                 if (!audioRecorder) {
@@ -110,6 +110,25 @@
                 $(this).text("Stop Recording");
                 }
             });
+
+            $('#confirmButton').on(click(function() {
+            console.log('Button Clicked'); // Log to console when button is clicked
+            
+            var textValue = $('#recognizedText').val();
+            
+            $.ajax({
+                url: '/process-text',
+                type: 'POST',
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify({ 'text': textValue }),
+                success: function(response) {
+                    console.log('Success:', response);
+                },
+                error: function(error) {
+                    console.log('Error:', error);
+                }
+                });
+            }));
 
             $("#upload-text-file").on("click", function() {
                   let textFile = $("#text-file")[0].files[0];
@@ -134,12 +153,9 @@
               $("#recognizedText").val(data.recognised);
           });
 		}
-        // This function will be called when the user clicks the confirm button
-        function confirmChanges() {
-            let text = document.getElementById('recognizedText').value;
-            // Add the code to send the text to Rosie here
-            console.log('Confirmed text:', text);
-        }
+
+
+
       </script>
     </head>
     <body>
@@ -148,7 +164,7 @@
             <div>
                 <h2>Edit Recognized Text</h2>
                 <textarea id="recognizedText" rows="4" cols="50"></textarea>`
-                <button id="confirmButton" onclick="confirmChanges()">confirm</button>
+                <button id="confirmButton" >confirm</button>
             </div>
             <button id="record-audio">Start Recording</button>
         </div>
