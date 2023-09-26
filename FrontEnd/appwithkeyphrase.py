@@ -8,11 +8,10 @@ from flask import Flask, request, jsonify, render_template, send_file
 
 app = Flask(__name__)
 textGenHost = "localhost:5000"
-AzureSpeechKey, AzureSpeechRegion = os.environ.get('AZURESPEECHKEY'), os.environ.get('AZUREREGION')
+AzureSpeechKey, AzureSpeechRegion = 'key', 'region'
 speech_config = speechsdk.SpeechConfig(subscription=AzureSpeechKey, region=AzureSpeechRegion)
 lastResponse = None
 recognisedText = None
-transcription = ""
 #set the key phrase, or set it as a array with multi keyphrase
 keywords = ['Hey, Rosie', 'Hey Rosie', 'Hi, Rosie', 'Hi Rosie']
 
@@ -26,6 +25,7 @@ def transcribeFile(audio_output_file_path):
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
     result = speech_recognizer.recognize_once()
+
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
         print("Recognized: {}".format(result.text))
         return result.text
@@ -37,7 +37,6 @@ def transcribeFile(audio_output_file_path):
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
             print("Did you set the speech resource key and region values?")
-
 
 def textGen(input):
     textgenURL = f"http://{textGenHost}/api/v1/chat"
@@ -106,9 +105,14 @@ def textToSpeech(text):
 @app.route("/get-last-response")
 def getLastResponse():
     return {'response': lastResponse}
-     
+
+@app.route("/get-recognised-text")
+def getRecognisedText():
+    return {'recognised': recognisedText}
+
 @app.route('/upload-audio-to-self', methods=['POST'])
 def SpeechToText():
+    response = None
     # Define the path to where the audio file should be saved
     audio_output_file_path = 'static/uploads/audio_file.wav'
 
@@ -130,15 +134,10 @@ def SpeechToText():
     
     # Transcribe the audio file using OpenAI and send the query to the Think endpoint
     print("Transcribing File")
-    
-    
     transcription = transcribeFile(audio_output_file_path)
-    
-    #below line is for testing the wakeup response keyphrase
-    #transcription = input("test phrase: ")
-    
     if transcription is not None:
-        #case-insensitive search, check if recongnize contain keyphrase
+        global recognisedText
+        recognisedText = transcription
         print('Transcription is not None, Its: ', transcription)
         for keyword in keywords:
             match = re.search(re.escape(keyword), transcription, re.IGNORECASE)
@@ -147,19 +146,43 @@ def SpeechToText():
                 # Extract substring from the keyword to the end of the string
                 start_index = match.start()
                 transcription = transcription[start_index:]
+
                 print('This text will be sent to GPT',transcription)
                 response = textGen(transcription)
                 break
         if response is not None:
             textToSpeech(response)
-    
+
     # Return a success message
     return 'Transcription Successful', 200
+
+@app.route('/process-text', methods=['POST'])
+def process_text():
+    print('Request received')  # Log to console when request is received
+    data = request.get_json()
+    print('Data received:', data)  # Log received data to console
+    data = request.get_json()
+    transcription = data.get('text', '')  # Get the text sent from the frontend
     
-@app.route('/get-transcription')
-def get_transcription():
-    global transcription  
-    return jsonify(text=transcription)
+    response = None
+    
+    if transcription:
+        print('Transcription is not None, Its: ', transcription)
+        for keyword in keywords:
+            match = re.search(re.escape(keyword), transcription, re.IGNORECASE)
+            if match:
+                print('KeyPhrase detect.')
+                start_index = match.start()
+                transcription = transcription[start_index:]
+                print('This text will be sent to GPT',transcription)
+                
+                response = textGen(transcription)  # Call the textGen function with the modified transcription
+                break  # Exit the loop once a keyword is found and transcription is updated
+        
+    if response:
+        textToSpeech(response)  # Call the textToSpeech function with the response
+        
+    return jsonify(status='success')
 
 
 @app.route('/rosie-speak', methods=['POST'])
