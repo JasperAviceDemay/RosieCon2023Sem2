@@ -20,3 +20,6 @@ Follow the instructions to install and run the Text Generation WebUI found [here
 
 
 Copy the Rosie character files from this repo's `characters` folder into the WebUI's `characters` folder. If you are already running the WebUI, simply refresh the characters and you will be able to load the Rosie character from there.
+
+### Real-time speech to text
+Azure real-time recognize [here](https://learn.microsoft.com/en-au/azure/ai-services/speech-service/how-to-recognize-speech?pivots=programming-language-python#use-continuous-recognition).
