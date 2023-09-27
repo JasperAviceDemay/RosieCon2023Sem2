@@ -81,7 +81,7 @@
 
         $(document).ready(function() {
             initAudioRecorder();
-            //checkForResponse();
+        //checkForResponse();
 		//autorecording, set 10sec
 		// let isRecording = false;
 		// let recordButton = $('#record-audio');
@@ -145,12 +145,11 @@
                 playAudio(audioPath);
             });
         });
-        function showRecognizedText(text) {
-            document.getElementById('recognizedText').value = text;
-        }
+
 		function fetchRecognisedText() {
           $.get("/get-recognised-text", function(data) {
               $("#recognizedText").val(data.recognised);
+			  console.log(data);
           });
 		}
 
