@@ -84,6 +84,21 @@ def SpeechToText():
     # Return a success message
     return 'Transcription Successful', 200
 
+@app.route('/process-text', methods=['POST'])
+def process_text():
+    print('Request received')  # Log to console when request is received
+    data = request.get_json()
+    print('Data received:', data)  # Log received data to console
+    data = request.get_json()
+    transcription = data.get('text', '')  # Get the text sent from the frontend
+    response = None
+    if transcription:
+        print(transcription)
+        response = rosieText.textGen(transcription)
+        if response is not None:
+            textToSpeech(response)  
+    return jsonify(status='success')
+
 
 @app.route('/rosie-speak', methods=['POST'])
 def text_to_speech():
