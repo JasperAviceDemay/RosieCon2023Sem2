@@ -56,7 +56,7 @@ class textGen:
         }
 
         print("Generating...")
-        response = requests.post(textGenUrl = f"http://{self.textGenHost}/api/v1/chat", json=request)
+        response = requests.post(f"http://{self.textGenHost}/api/v1/chat", json=request)
         print(response.status_code)
         if response.status_code == 200:
             result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
