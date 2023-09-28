@@ -8,6 +8,11 @@ keywords = ['Hey, Rosie', 'Hey Rosie', 'Hi, Rosie', 'Hi Rosie']
 endwords = ['Thank you, Rosie.', 'End conversation.', 'That will be all.']
 AzureSpeechKey, AzureSpeechRegion = os.environ.get('AZURESPEECHKEY'), os.environ.get('AZUREREGION')
 speech_config = speechsdk.SpeechConfig(subscription=AzureSpeechKey, region=AzureSpeechRegion)
+#audio config
+audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
+#default voice can be change or custom
+speech_config.speech_synthesis_voice_name='en-US-JennyNeural'
+speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
 
 
 
@@ -60,6 +65,8 @@ def from_mic():
                     print(f"This text will be sent to GPT '{transcription}'")
                     printline()
                     response = rosieText.textGen(transcription)
+                    if response:
+                        to_speaker(response)
                     break
             
             if endword_detected:
@@ -82,14 +89,18 @@ def from_mic():
 
 
 
-
-
-
-
-
-
-
-
+def to_speaker(text):
+    speech_synthesis_result = speech_synthesizer.speak_text_async(text).get()
+    
+    if speech_synthesis_result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+        print("Speech synthesized for text [{}]".format(text))
+    elif speech_synthesis_result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = speech_synthesis_result.cancellation_details
+        print("Speech synthesis canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            if cancellation_details.error_details:
+                print("Error details: {}".format(cancellation_details.error_details))
+                print("Did you set the speech resource key and region values?")
 
 
 
