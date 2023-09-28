@@ -2,9 +2,9 @@ import requests
 import html
 
 class textGen:
-    def __init__(self):
-        self.textGenHost="localhost:5000"
-        self.lastResponse = None
+    textGenHost="localhost:5000"
+    lastResponse = None
+    history = {'internal': [], 'visible': []}
 
     def textGen(self, input):
         request = {
@@ -12,6 +12,7 @@ class textGen:
             'max_new_tokens': 250,
             'auto_max_new_tokens': False,
             'max_tokens_second': 0,
+            'history': self.history,
             'mode': 'chat',  # Valid options: 'chat', 'chat-instruct', 'instruct'
             'character': 'Rosie',
             'instruction_template': 'Vicuna-v1.1',  # Will get autodetected if unset
@@ -60,6 +61,7 @@ class textGen:
         print(response.status_code)
         if response.status_code == 200:
             result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
+            self.history =  response.json()['results'][0]['history']
             print(result)
             self.lastResponse = result
             return result
