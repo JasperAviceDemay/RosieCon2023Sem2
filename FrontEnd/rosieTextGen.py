@@ -1,10 +1,28 @@
+import json
 import requests
 import html
+import os.path
+from datetime import datetime
 
 class textGen:
     textGenHost="localhost:5000"
     lastResponse = None
     history = {'internal': [], 'visible': []}
+    def __init__(self):
+        self.logPath = f"{os.path.dirname(os.path.abspath(__file__))}/logs"
+        if not os.path.exists(self.logPath):
+            os.makedirs(self.logPath)
+
+        logName = f"log-{datetime.today().strftime('%Y-%m-%d')}"
+
+        self.logFile = os.path.abspath(f"{self.logPath}/{logName}.json")
+        print(self.logFile)
+        if os.path.exists(self.logFile):
+            with open(self.logFile, "r") as f:
+                self.history = json.load(f)
+
+            f.close()
+        
 
     def textGen(self, input):
         request = {
@@ -56,13 +74,22 @@ class textGen:
             'stopping_strings': []
         }
 
-        print("Generating...")
         response = requests.post(f"http://{self.textGenHost}/api/v1/chat", json=request)
-        print(response.status_code)
         if response.status_code == 200:
             result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
             self.history =  response.json()['results'][0]['history']
-            print(result)
             self.lastResponse = result
+            self.__saveHistory()
             return result
         
+    def __saveHistory(self):
+        with open(self.logFile, 'w') as f:
+            json.dump(self.history, f, indent=4)
+
+        f.close()
+
+
+if __name__ == '__main__':
+    txt = textGen()
+    while(True):
+        print("Rosie: " + txt.textGen(input("You: ")))
