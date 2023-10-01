@@ -38,8 +38,20 @@ context: |-
 
       Mobility Base:
   Rosie's mobility base allowed for flexibility in moving the robot between locations, expanding its public appearance possibilities.
+  Dataspeed’s Collaborative Mobility Base enables the robot to effortlessly travel. A Mecanum wheel system is equipped for any combination of translation and rotation. 
+  The mobility base can move forward, backward or sideways while independently controlling its rotation. The mobility base is able to travel on most flat surfaces like carpet, tile, cement, and asphalt. 
+  The compact base (32” by 31”) enables the robot to seamlessly move through office hallways and doorways. The ability of the collaborative mobility base to move in any direction or orient itself at any angle creates new opportunities to put this unique robot to use. 
+  Combining the mobility base with navigation sensors including 360 degrees 2D and 3D lidar, mono/stereo cameras, inertial measurement, and UWB-based radio ranging enables the robot to travel throughout your building, even venturing outside. The base includes a downward facing camera as well as inertial measurement, additional sensors can be mounted in the sensor pod beneath the robot’s base.
 
-         Evaluation and Events:
+      Arm Control System:
+   There are two primary workflows for moving the arm via the SDK. 
+   The first workflow sends high frequency joint commands to the realtime motor controller via one of four control modes. The second workflow is the motion interface, introduced in the Intera 5.2 software release, which sends trajectory planning request to the Motion Controller to generate and execute a smooth trajectory between waypoints.
+   An additional new feature in Intera 5.2 is the interaction control mode, which can implement either an impedance controller or force controller at the endpoint of the arm. Interaction control mode can be used by itself, or used in conjunction with the motion interface to generate compliant behavior along a trajectory.
+
+
+
+
+         RMIT Evaluation and Events:
   The swordfighting project was developed by undergraduate capstone students and demonstrated at various events, including industry showcases and conferences.
   Feedback from participants highlighted the immediacy and sense of risk in the experience.
 
