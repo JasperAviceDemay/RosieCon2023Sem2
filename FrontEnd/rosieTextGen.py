@@ -5,7 +5,8 @@ import os.path
 from datetime import datetime
 
 class textGen:
-    textGenHost="localhost:5000"
+    #self.textGenHost="localhost:5000"
+    self.textGenHost='52.62.118.55:7860'
     lastResponse = None
     history = {'internal': [], 'visible': []}
     def __init__(self):
