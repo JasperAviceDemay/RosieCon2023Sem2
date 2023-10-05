@@ -144,7 +144,7 @@ def to_speaker(text):
 
 # def recognize_from_file():
     # # This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
-    # speech_config = speechsdk.SpeechConfig(subscription = 'e98218fbd9464282a720426098015726', region= 'australiaeast')
+    # speech_config = speechsdk.SpeechConfig(subscription = '', region= 'australiaeast')
     # speech_config.speech_recognition_language="en-US"
 
     # audio_config = speechsdk.audio.AudioConfig(filename="katiesteve.wav")
