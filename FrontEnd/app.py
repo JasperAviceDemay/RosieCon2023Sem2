@@ -6,7 +6,7 @@ from gtts import gTTS
 from flask import Flask, request, jsonify, render_template, send_file
 import joblib
 #import profanity_check
-
+#from joblib import profanity_check
 
 app = Flask(__name__)
 textGenHost = "localhost:5000"
