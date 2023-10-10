@@ -1,4 +1,5 @@
-import json
+
+import logging
 import requests
 import html
 import os.path
@@ -8,24 +9,26 @@ class textGen:
     #textGenHost="localhost:5000"
     textGenHost='52.62.118.55:7860'
     lastResponse = None
-    history = {'internal': [], 'visible': []}
-    def __init__(self):
-        self.logPath = f"{os.path.dirname(os.path.abspath(__file__))}/logs"
-        if not os.path.exists(self.logPath):
-            os.makedirs(self.logPath)
+    history = None
 
-        logName = f"log-{datetime.today().strftime('%Y-%m-%d')}"
+    logger = logging.getLogger('textgen')
+    logger.setLevel(logging.DEBUG)
 
-        self.logFile = os.path.abspath(f"{self.logPath}/{logName}.json")
-        print(self.logFile)
-        if os.path.exists(self.logFile):
-            with open(self.logFile, "r") as f:
-                self.history = json.load(f)
-
-            f.close()
+    
+    logPath = f"{os.path.dirname(os.path.abspath(__file__))}/logs"
+    if not os.path.exists(logPath):
+        os.makedirs(logPath)
+        
+    logName = f"log-{datetime.today().strftime('%Y-%m-%d')}"
+    logFile = os.path.abspath(f"{logPath}/{logName}.log")
+    fh = logging.FileHandler(logFile)
+    fh.setLevel(logging.ERROR)
+    fh.setFormatter(logging.Formatter('%(asctime)s- %(message)s'))
+    logger.addHandler(fh)
         
 
     def textGen(self, input):
+        self.logger.info(f'User: {input}')
         request = {
             'user_input': input,
             'max_new_tokens': 250,
@@ -75,22 +78,33 @@ class textGen:
             'stopping_strings': []
         }
 
-        response = requests.post(f"http://{self.textGenHost}/api/v1/chat", json=request)
-        if response.status_code == 200:
-            result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
-            self.history =  response.json()['results'][0]['history']
-            self.lastResponse = result
-            self.__saveHistory()
-            return result
+        result = None
+        try:
+            response = requests.post(f"http://{self.textGenHost}/api/v1/chat", json=request)
+            if response.status_code != 200:
+                result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
+                self.history =  response.json()['results'][0]['history']
+                self.lastResponse = result
+                self.logger.info(f'Rosie: {result}')
+            else:
+                message = f'Could not get response: {response.status_code} {response.reason}'
+                self.logger.error(message)
+                print(message)
+        except Exception as exception:
+            message = f'Exception: {exception}'
+            self.logger.error(message)
+            print(message)
         
-    def __saveHistory(self):
-        with open(self.logFile, 'w') as f:
-            json.dump(self.history, f, indent=4)
+        return result
 
-        f.close()
-
+        
 
 if __name__ == '__main__':
     txt = textGen()
     while(True):
-        print("Rosie: " + txt.textGen(input("You: ")))
+        try:
+            print("Rosie: " + txt.textGen(input("You: ")))
+        except TypeError:
+            print("Rosie could not respond")
+        except KeyboardInterrupt:
+            break
