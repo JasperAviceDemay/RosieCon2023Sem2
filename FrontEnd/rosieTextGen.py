@@ -78,23 +78,22 @@ class textGen:
             'stopping_strings': []
         }
 
-        result = None
         try:
             response = requests.post(f"http://{self.textGenHost}/api/v1/chat", json=request)
-            if response.status_code != 200:
-                result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
-                self.history =  response.json()['results'][0]['history']
-                self.lastResponse = result
-                self.logger.info(f'Rosie: {result}')
-            else:
-                message = f'Could not get response: {response.status_code} {response.reason}'
-                self.logger.error(message)
-                print(message)
-        except Exception as exception:
-            message = f'Exception: {exception}'
+            response.raise_for_status()
+        except requests.HTTPError as ex:
+            message = f'HTTP Error: {response.status_code} {response.reason}'
             self.logger.error(message)
             print(message)
-        
+        except TimeoutError as ex:
+            message = f'Connection Error: Timed Out'
+            self.logger.error(message)
+            print(message)
+            
+        result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
+        self.history =  response.json()['results'][0]['history']
+        self.lastResponse = result
+        self.logger.info(f'Rosie: {result}')
         return result
 
         
