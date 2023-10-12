@@ -9,7 +9,7 @@ class textGen:
     #textGenHost="localhost:5000"
     textGenHost='52.62.118.55:7860'
     lastResponse = None
-    history = None
+    history = {'internal': [], 'visible': []}
 
     logger = logging.getLogger('textgen')
     logger.setLevel(logging.DEBUG)
@@ -22,7 +22,7 @@ class textGen:
     logName = f"log-{datetime.today().strftime('%Y-%m-%d')}"
     logFile = os.path.abspath(f"{logPath}/{logName}.log")
     fh = logging.FileHandler(logFile)
-    fh.setLevel(logging.ERROR)
+    fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter('%(asctime)s- %(message)s'))
     logger.addHandler(fh)
         
@@ -78,6 +78,8 @@ class textGen:
             'stopping_strings': []
         }
 
+        
+
         try:
             response = requests.post(f"http://{self.textGenHost}/api/v1/chat", json=request)
             response.raise_for_status()
@@ -85,16 +87,15 @@ class textGen:
             message = f'HTTP Error: {response.status_code} {response.reason}'
             self.logger.error(message)
             print(message)
-        except TimeoutError as ex:
-            message = f'Connection Error: Timed Out'
-            self.logger.error(message)
-            print(message)
-            
-        result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
-        self.history =  response.json()['results'][0]['history']
-        self.lastResponse = result
-        self.logger.info(f'Rosie: {result}')
-        return result
+        except Exception as ex:
+            self.logger.error(ex)
+            print(ex)
+        else:
+            result = html.unescape(response.json()['results'][0]['history']['visible'][-1][1])
+            self.history =  response.json()['results'][0]['history']
+            self.lastResponse = result
+            self.logger.info(f'Rosie: {result}')
+            return result
 
         
 
