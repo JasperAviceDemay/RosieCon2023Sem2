@@ -41,6 +41,7 @@ After you add the environment variables, you might need to restart any programs 
 ```
 export SPEECH_KEY=your-key
 export SPEECH_REGION=your-region
+source ~/.bashrc
 ```
 After you add the environment variables, run source ~/.bashrc from your console window to make the changes effective.
 
@@ -50,6 +51,7 @@ Edit your .bash_profile file, and add the environment variables:
 ```
 export SPEECH_KEY=your-key
 export SPEECH_REGION=your-region
+source ~/.bash_profile
 ```
 After you add the environment variables, run source ~/.bash_profile from your console window to make the changes effective.
 
