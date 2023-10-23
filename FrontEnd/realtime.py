@@ -6,8 +6,8 @@ import azure.cognitiveservices.speech as speechsdk
 from rosieTextGen import textGen
 
 keywords = ['Hey, Rosie', 'Hey Rosie', 'Hi, Rosie', 'Hi Rosie']
-endwords = ['Thank you, Rosie.', 'End conversation.', 'That will be all.']
-AzureSpeechKey, AzureSpeechRegion = os.environ.get('AZURESPEECHKEY'), os.environ.get('AZUREREGION')
+endwords = ['End conversation.', 'That will be all.']
+AzureSpeechKey, AzureSpeechRegion = os.environ.get('SPEECH_KEY'), os.environ.get('SPEECH_REGION')
 speech_config = speechsdk.SpeechConfig(subscription=AzureSpeechKey, region=AzureSpeechRegion)
 #audio config
 audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
