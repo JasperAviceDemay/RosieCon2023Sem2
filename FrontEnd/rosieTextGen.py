@@ -7,7 +7,10 @@ from datetime import datetime
 
 class textGen:
     #textGenHost="localhost:5000"
-    textGenHost='52.62.118.55:7860'
+    #Address to AWS outside RMIT network
+    #textGenHost='52.62.118.55:7860'
+    #address within RMIT network
+    textGenHost='ec2-52-62-118-55.ap-southeast-2.compute.amazonaws.com:7860'
     lastResponse = None
     history = {'internal': [], 'visible': []}
 
