@@ -7,8 +7,7 @@ from rosieTextGen import textGen
 
 keywords = ['Hey, Rosie', 'Hey Rosie', 'Hi, Rosie', 'Hi Rosie']
 endwords = ['End conversation.', 'That will be all.']
-AzureSpeechKey, AzureSpeechRegion = os.environ.get('SPEECH_KEY'), os.environ.get('SPEECH_REGION')
-speech_config = speechsdk.SpeechConfig(subscription=AzureSpeechKey, region=AzureSpeechRegion)
+speech_config = speechsdk.SpeechConfig(subscription=os.environ.get('SPEECH_KEY'), region=os.environ.get('SPEECH_REGION'))
 #audio config
 audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
 #default voice can be change or custom
