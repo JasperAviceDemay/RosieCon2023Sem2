@@ -8,7 +8,8 @@ headers = {
 }
 
 
-response = requests.request(while True:
+response = requests.request
+(while True:
     try:
         response = requests.request("POST", url, headers=headers)
         if response.status_code >= 200 and response.status_code < 300:
