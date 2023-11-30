@@ -7,7 +7,7 @@ headers = {
     'auth': os.environ['APIAUTH']
 }
 
-time.sleep(60) 
+time.sleep(120) 
 
 response = requests.request("POST", url, headers=headers)
 
