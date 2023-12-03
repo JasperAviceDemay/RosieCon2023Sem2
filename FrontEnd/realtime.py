@@ -5,7 +5,7 @@ import time
 import azure.cognitiveservices.speech as speechsdk
 from rosieTextGen import textGen
 
-keywords = ['Hey, Rosie', 'Hey Rosie', 'Hi, Rosie', 'Hi Rosie']
+keywords = ['Hey, Rosie', 'Hey Rosie', 'Hi, Rosie', 'Hi Rosie', 'Rosie']
 endwords = ['End conversation.', 'That will be all.']
 speech_config = speechsdk.SpeechConfig(subscription=os.environ.get('SPEECH_KEY'), region=os.environ.get('SPEECH_REGION'))
 #audio config
