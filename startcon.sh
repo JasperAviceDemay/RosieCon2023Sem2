@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Add your commands to .bashrc
-echo 'python3 /rosiecon/RosieCon2023Sem2/start.py' >> ~/.bashrc
+python3 /rosiecon/RosieCon2023Sem2/start.py
 
 # Add a delay
 echo "Waiting before attempting SSH connection..."
