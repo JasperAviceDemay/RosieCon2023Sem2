@@ -17,6 +17,6 @@ echo "SSH connection established, continuing with script..."
 
 #start speech to text 
 
-python3 /rosiecon/RosieCon2023Sem2/realtime.py
+python3 /rosiecon/RosieCon2023Sem2/FrontEnd/realtime.py
 
 sleep 20 
